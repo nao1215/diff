@@ -1,4 +1,4 @@
-module github.com/go-spectest/difflib
+module github.com/go-spectest/diff
 
 go 1.18
 
