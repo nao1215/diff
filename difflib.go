@@ -29,6 +29,7 @@ const (
 	green = "\033[32m"
 )
 
+// min return the smaller of two integers.
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -36,6 +37,7 @@ func min(a, b int) int {
 	return b
 }
 
+// max return the larger of two integers.
 func max(a, b int) int {
 	if a > b {
 		return a
@@ -43,6 +45,7 @@ func max(a, b int) int {
 	return b
 }
 
+// calculateRatio return a measure of the sequences' similarity (float in [0,1]).
 func calculateRatio(matches, length int) float64 {
 	if length > 0 {
 		return 2.0 * float64(matches) / float64(length)
@@ -157,47 +160,46 @@ func (m *SequenceMatcher) SetSeq2(b []string) {
 	m.chainB()
 }
 
+// chainB Build b2j as a map from elements of b to a list of offsets.
 func (m *SequenceMatcher) chainB() {
-	// Populate line -> index mapping
-	b2j := map[string][]int{}
-	for i, s := range m.b {
-		indices := b2j[s]
-		indices = append(indices, i)
-		b2j[s] = indices
+	// Create a map from each string in b to a slice of its indices
+	b2j := make(map[string][]int)
+	for i, str := range m.b {
+		b2j[str] = append(b2j[str], i)
 	}
 
-	// Purge junk elements
-	m.bJunk = map[string]struct{}{}
+	// Remove junk elements
 	if m.IsJunk != nil {
-		junk := m.bJunk
-		for s := range b2j {
-			if m.IsJunk(s) {
-				junk[s] = struct{}{}
+		junk := make(map[string]struct{})
+		for str := range b2j {
+			if m.IsJunk(str) {
+				junk[str] = struct{}{}
 			}
 		}
-		for s := range junk {
-			delete(b2j, s)
+		for str := range junk {
+			delete(b2j, str)
 		}
+		m.bJunk = junk
 	}
 
-	// Purge remaining popular elements
-	popular := map[string]struct{}{}
-	n := len(m.b)
-	if m.autoJunk && n >= 200 {
-		ntest := n/100 + 1
-		for s, indices := range b2j {
+	// Remove popular elements
+	if m.autoJunk && len(m.b) >= 200 {
+		popular := make(map[string]struct{})
+		ntest := len(m.b)/100 + 1
+		for str, indices := range b2j {
 			if len(indices) > ntest {
-				popular[s] = struct{}{}
+				popular[str] = struct{}{}
 			}
 		}
-		for s := range popular {
-			delete(b2j, s)
+		for str := range popular {
+			delete(b2j, str)
 		}
+		m.bPopular = popular
 	}
-	m.bPopular = popular
 	m.b2j = b2j
 }
 
+// isBJunk return true if b is junk.
 func (m *SequenceMatcher) isBJunk(s string) bool {
 	_, ok := m.bJunk[s]
 	return ok
@@ -581,7 +583,7 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 	}
 
 	if len(diff.Eol) == 0 {
-		diff.Eol = "\n"
+		diff.Eol = lineFeed()
 	}
 
 	started := false
@@ -709,7 +711,7 @@ func WriteContextDiff(writer io.Writer, diff ContextDiff) error {
 	}
 
 	if len(diff.Eol) == 0 {
-		diff.Eol = "\n"
+		diff.Eol = lineFeed()
 	}
 
 	prefix := map[byte]string{
@@ -786,7 +788,15 @@ func GetContextDiffString(diff ContextDiff) (string, error) {
 // SplitLines split a string on "\n" while preserving them. The output can be used
 // as input for UnifiedDiff and ContextDiff structures.
 func SplitLines(s string) []string {
-	lines := strings.SplitAfter(s, "\n")
-	lines[len(lines)-1] += "\n"
+	lines := strings.SplitAfter(s, lineFeed())
+	lines[len(lines)-1] += lineFeed()
 	return lines
+}
+
+// lineFeed return line feed for current OS.
+func lineFeed() string {
+	if runtime.GOOS == "windows" {
+		return "\r\n"
+	}
+	return "\n"
 }
