@@ -57,6 +57,10 @@ r a[3:4], (x) b[2:3] (y)
 e a[4:6], (cd) b[3:5] (cd)
 i a[6:6], () b[5:6] (f)
 `
+	if runtime.GOOS == "windows" {
+		expected = strings.Replace(expected, "\n", "\r\n", -1)
+	}
+
 	if diff := cmp.Diff(expected, got); diff != "" {
 		t.Errorf("User value is mismatch (-expected +got):%s%s", lineFeed(), diff)
 	}
@@ -102,6 +106,10 @@ group
   r, 34, 35, 30, 31
   e, 35, 38, 31, 34
 `
+
+	if runtime.GOOS == "windows" {
+		expected = strings.Replace(expected, "\n", "\r\n", -1)
+	}
 	if diff := cmp.Diff(expected, got); diff != "" {
 		t.Errorf("User value is mismatch (-expected +got):%s%s", lineFeed(), diff)
 	}
