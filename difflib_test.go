@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func assertAlmostEqual(t *testing.T, a, b float64, places int) {
@@ -43,18 +46,23 @@ func TestGetOptCodes(t *testing.T) {
 	s := NewMatcher(splitChars(a), splitChars(b))
 	w := &bytes.Buffer{}
 	for _, op := range s.GetOpCodes() {
-		fmt.Fprintf(w, "%s a[%d:%d], (%s) b[%d:%d] (%s)\n", string(op.Tag),
-			op.I1, op.I2, a[op.I1:op.I2], op.J1, op.J2, b[op.J1:op.J2])
+		fmt.Fprintf(w, "%s a[%d:%d], (%s) b[%d:%d] (%s)%s", string(op.Tag),
+			op.I1, op.I2, a[op.I1:op.I2], op.J1, op.J2, b[op.J1:op.J2],
+			lineFeed())
 	}
-	result := w.String()
+	got := w.String()
 	expected := `d a[0:1], (q) b[0:0] ()
 e a[1:3], (ab) b[0:2] (ab)
 r a[3:4], (x) b[2:3] (y)
 e a[4:6], (cd) b[3:5] (cd)
 i a[6:6], () b[5:6] (f)
 `
-	if expected != result {
-		t.Errorf("unexpected op codes: \n%s", result)
+	if runtime.GOOS == "windows" {
+		expected = strings.ReplaceAll(expected, "\n", "\r\n")
+	}
+
+	if diff := cmp.Diff(expected, got); diff != "" {
+		t.Errorf("User value is mismatch (-expected +got):%s%s", lineFeed(), diff)
 	}
 }
 
@@ -75,13 +83,14 @@ func TestGroupedOpCodes(t *testing.T) {
 	s := NewMatcher(a, b)
 	w := &bytes.Buffer{}
 	for _, g := range s.GetGroupedOpCodes(-1) {
-		fmt.Fprintf(w, "group\n")
+		fmt.Fprintf(w, "group%s", lineFeed())
 		for _, op := range g {
-			fmt.Fprintf(w, "  %s, %d, %d, %d, %d\n", string(op.Tag),
-				op.I1, op.I2, op.J1, op.J2)
+			fmt.Fprintf(w, "  %s, %d, %d, %d, %d%s", string(op.Tag),
+				op.I1, op.I2, op.J1, op.J2,
+				lineFeed())
 		}
 	}
-	result := w.String()
+	got := w.String()
 	expected := `group
   e, 5, 8, 5, 8
   i, 8, 8, 8, 9
@@ -97,8 +106,12 @@ group
   r, 34, 35, 30, 31
   e, 35, 38, 31, 34
 `
-	if expected != result {
-		t.Errorf("unexpected op codes: \n%s", result)
+
+	if runtime.GOOS == "windows" {
+		expected = strings.ReplaceAll(expected, "\n", "\r\n")
+	}
+	if diff := cmp.Diff(expected, got); diff != "" {
+		t.Errorf("User value is mismatch (-expected +got):%s%s", lineFeed(), diff)
 	}
 }
 
@@ -219,19 +232,27 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 		FromDate: "2005-01-26 23:30:50",
 		ToFile:   "Current",
 		ToDate:   "2010-04-12 10:20:52",
-		Eol:      "\n",
+		Eol:      lineFeed(),
 	}
 	ud, err := GetUnifiedDiffString(diff)
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(ud)[:2], []string{
-		"\u001B[31m---\u001B[0m Original\t2005-01-26 23:30:50\n",
-		"\u001B[32m+++\u001B[0m Current\t2010-04-12 10:20:52\n",
-	})
+	if runtime.GOOS == "windows" {
+		assertEqual(t, SplitLines(ud)[:2], []string{
+			"--- Original\t2005-01-26 23:30:50" + lineFeed(),
+			"+++ Current\t2010-04-12 10:20:52" + lineFeed(),
+		})
+	} else {
+		assertEqual(t, SplitLines(ud)[:2], []string{
+			"\u001B[31m---\u001B[0m Original\t2005-01-26 23:30:50" + lineFeed(),
+			"\u001B[32m+++\u001B[0m Current\t2010-04-12 10:20:52" + lineFeed(),
+		})
+	}
+
 	cd, err := GetContextDiffString(ContextDiff(diff))
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd)[:2], []string{
-		"*** Original\t2005-01-26 23:30:50\n",
-		"--- Current\t2010-04-12 10:20:52\n",
+		"*** Original\t2005-01-26 23:30:50" + lineFeed(),
+		"--- Current\t2010-04-12 10:20:52" + lineFeed(),
 	})
 }
 
@@ -241,15 +262,19 @@ func TestOutputFormatNoTrailingTabOnEmptyFileDate(t *testing.T) {
 		B:        splitChars("two"),
 		FromFile: "Original",
 		ToFile:   "Current",
-		Eol:      "\n",
+		Eol:      lineFeed(),
 	}
 	ud, err := GetUnifiedDiffString(diff)
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(ud)[:2], []string{"\u001B[31m---\u001B[0m Original\n", "\u001B[32m+++\u001B[0m Current\n"})
+	if runtime.GOOS == "windows" {
+		assertEqual(t, SplitLines(ud)[:2], []string{"--- Original" + lineFeed(), "+++ Current" + lineFeed()})
+	} else {
+		assertEqual(t, SplitLines(ud)[:2], []string{"\u001B[31m---\u001B[0m Original" + lineFeed(), "\u001B[32m+++\u001B[0m Current" + lineFeed()})
+	}
 
 	cd, err := GetContextDiffString(ContextDiff(diff))
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(cd)[:2], []string{"*** Original\n", "--- Current\n"})
+	assertEqual(t, SplitLines(cd)[:2], []string{"*** Original" + lineFeed(), "--- Current" + lineFeed()})
 }
 
 func TestSplitLines(t *testing.T) {
@@ -257,9 +282,9 @@ func TestSplitLines(t *testing.T) {
 		input string
 		want  []string
 	}{
-		{"foo", []string{"foo\n"}},
-		{"foo\nbar", []string{"foo\n", "bar\n"}},
-		{"foo\nbar\n", []string{"foo\n", "bar\n", "\n"}},
+		{"foo", []string{"foo" + lineFeed()}},
+		{"foo" + lineFeed() + "bar", []string{"foo" + lineFeed(), "bar" + lineFeed()}},
+		{"foo" + lineFeed() + "bar" + lineFeed(), []string{"foo" + lineFeed(), "bar" + lineFeed(), lineFeed()}},
 	}
 	for _, test := range allTests {
 		assertEqual(t, SplitLines(test.input), test.want)
@@ -267,7 +292,7 @@ func TestSplitLines(t *testing.T) {
 }
 
 func benchmarkSplitLines(b *testing.B, count int) {
-	str := strings.Repeat("foo\n", count)
+	str := strings.Repeat("foo"+lineFeed(), count)
 
 	b.ResetTimer()
 
