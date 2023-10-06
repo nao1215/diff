@@ -226,10 +226,18 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 	}
 	ud, err := GetUnifiedDiffString(diff)
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(ud)[:2], []string{
-		"\u001B[31m---\u001B[0m Original\t2005-01-26 23:30:50" + lineFeed(),
-		"\u001B[32m+++\u001B[0m Current\t2010-04-12 10:20:52" + lineFeed(),
-	})
+	if runtime.GOOS == "windows" {
+		assertEqual(t, SplitLines(ud)[:2], []string{
+			"--- Original\t2005-01-26 23:30:50" + lineFeed(),
+			"+++ Current\t2010-04-12 10:20:52" + lineFeed(),
+		})
+	} else {
+		assertEqual(t, SplitLines(ud)[:2], []string{
+			"\u001B[31m---\u001B[0m Original\t2005-01-26 23:30:50" + lineFeed(),
+			"\u001B[32m+++\u001B[0m Current\t2010-04-12 10:20:52" + lineFeed(),
+		})
+	}
+
 	cd, err := GetContextDiffString(ContextDiff(diff))
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd)[:2], []string{

@@ -1,6 +1,8 @@
 [![LinuxUnitTest](https://github.com/go-spectest/difflib/actions/workflows/linux_test.yml/badge.svg)](https://github.com/go-spectest/difflib/actions/workflows/linux_test.yml)
 [![MacUnitTest](https://github.com/go-spectest/difflib/actions/workflows/mac_test.yml/badge.svg)](https://github.com/go-spectest/difflib/actions/workflows/mac_test.yml)
+[![WindowsUnitTest](https://github.com/go-spectest/difflib/actions/workflows/windows_test.yml/badge.svg)](https://github.com/go-spectest/difflib/actions/workflows/windows_test.yml)
 [![Vuluncheck](https://github.com/go-spectest/difflib/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/go-spectest/difflib/actions/workflows/govulncheck.yml)
+[![reviewdog](https://github.com/go-spectest/difflib/actions/workflows/reviewdog.yml/badge.svg)](https://github.com/go-spectest/difflib/actions/workflows/reviewdog.yml)
 ## difflib
 
 This repository is forked from [pmezard/go-difflib](https://github.com/pmezard/go-difflib) by [Stein Fletcher](https://github.com/steinfletcher). He was maintaining difflib within the apitest package.
@@ -23,10 +25,14 @@ The following class and functions (and related tests) have be ported:
 $ go get github.com/go-spectest/difflib
 ```
 
+## Supported OS
+- Linux
+- macOS
+- Windows
+
 ### Quick Start
 
-Diffs are configured with Unified (or ContextDiff) structures, and can
-be output to an io.Writer or returned as a string.
+Diffs are configured with Unified (or ContextDiff) structures, and can be output to an io.Writer or returned as a string.
 
 ```Go
 diff := difflib.UnifiedDiff{
