@@ -8,6 +8,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func assertAlmostEqual(t *testing.T, a, b float64, places int) {
@@ -48,15 +50,15 @@ func TestGetOptCodes(t *testing.T) {
 			op.I1, op.I2, a[op.I1:op.I2], op.J1, op.J2, b[op.J1:op.J2],
 			lineFeed())
 	}
-	result := w.String()
+	got := w.String()
 	expected := `d a[0:1], (q) b[0:0] ()
 e a[1:3], (ab) b[0:2] (ab)
 r a[3:4], (x) b[2:3] (y)
 e a[4:6], (cd) b[3:5] (cd)
 i a[6:6], () b[5:6] (f)
 `
-	if expected != result {
-		t.Errorf("unexpected op codes: %s%s", lineFeed(), result)
+	if diff := cmp.Diff(expected, got); diff != "" {
+		t.Errorf("User value is mismatch (-expected +got):%s%s", lineFeed(), diff)
 	}
 }
 
@@ -84,7 +86,7 @@ func TestGroupedOpCodes(t *testing.T) {
 				lineFeed())
 		}
 	}
-	result := w.String()
+	got := w.String()
 	expected := `group
   e, 5, 8, 5, 8
   i, 8, 8, 8, 9
@@ -100,8 +102,8 @@ group
   r, 34, 35, 30, 31
   e, 35, 38, 31, 34
 `
-	if expected != result {
-		t.Errorf("unexpected op codes: %s%s", lineFeed(), result)
+	if diff := cmp.Diff(expected, got); diff != "" {
+		t.Errorf("User value is mismatch (-expected +got):%s%s", lineFeed(), diff)
 	}
 }
 
