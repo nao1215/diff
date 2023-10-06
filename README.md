@@ -3,6 +3,8 @@
 [![WindowsUnitTest](https://github.com/go-spectest/diff/actions/workflows/windows_test.yml/badge.svg)](https://github.com/go-spectest/diff/actions/workflows/windows_test.yml)
 [![Vuluncheck](https://github.com/go-spectest/diff/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/go-spectest/diff/actions/workflows/govulncheck.yml)
 [![reviewdog](https://github.com/go-spectest/diff/actions/workflows/reviewdog.yml/badge.svg)](https://github.com/go-spectest/diff/actions/workflows/reviewdog.yml)
+[![Gosec](https://github.com/go-spectest/diff/actions/workflows/security.yml/badge.svg)](https://github.com/go-spectest/diff/actions/workflows/security.yml)
+![Coverage](https://github.com/go-spectest/octocovs-central-repo/blob/main//badges/go-spectest/diff/coverage.svg?raw=true)
 ## go-spectest/diff package
 
 This repository is forked from [pmezard/go-difflib](https://github.com/pmezard/go-difflib) by [Stein Fletcher](https://github.com/steinfletcher). He was maintaining difflib within the apitest package.
