@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/fatih/color"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -225,6 +226,9 @@ func TestOutputFormatRangeFormatContext(t *testing.T) {
 }
 
 func TestOutputFormatTabDelimiter(t *testing.T) {
+	red := color.New(color.FgRed).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+
 	diff := UnifiedDiff{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
@@ -236,17 +240,10 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 	}
 	ud, err := GetUnifiedDiffString(diff)
 	assertEqual(t, err, nil)
-	if runtime.GOOS == "windows" {
-		assertEqual(t, SplitLines(ud)[:2], []string{
-			"--- Original\t2005-01-26 23:30:50" + lineFeed(),
-			"+++ Current\t2010-04-12 10:20:52" + lineFeed(),
-		})
-	} else {
-		assertEqual(t, SplitLines(ud)[:2], []string{
-			"\u001B[31m---\u001B[0m Original\t2005-01-26 23:30:50" + lineFeed(),
-			"\u001B[32m+++\u001B[0m Current\t2010-04-12 10:20:52" + lineFeed(),
-		})
-	}
+	assertEqual(t, SplitLines(ud)[:2], []string{
+		red("---") + " Original\t2005-01-26 23:30:50" + lineFeed(),
+		green("+++") + " Current\t2010-04-12 10:20:52" + lineFeed(),
+	})
 
 	cd, err := GetContextDiffString(ContextDiff(diff))
 	assertEqual(t, err, nil)
@@ -257,6 +254,9 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 }
 
 func TestOutputFormatNoTrailingTabOnEmptyFileDate(t *testing.T) {
+	red := color.New(color.FgRed).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+
 	diff := UnifiedDiff{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
@@ -266,11 +266,7 @@ func TestOutputFormatNoTrailingTabOnEmptyFileDate(t *testing.T) {
 	}
 	ud, err := GetUnifiedDiffString(diff)
 	assertEqual(t, err, nil)
-	if runtime.GOOS == "windows" {
-		assertEqual(t, SplitLines(ud)[:2], []string{"--- Original" + lineFeed(), "+++ Current" + lineFeed()})
-	} else {
-		assertEqual(t, SplitLines(ud)[:2], []string{"\u001B[31m---\u001B[0m Original" + lineFeed(), "\u001B[32m+++\u001B[0m Current" + lineFeed()})
-	}
+	assertEqual(t, SplitLines(ud)[:2], []string{red("---") + " Original" + lineFeed(), green("+++") + " Current" + lineFeed()})
 
 	cd, err := GetContextDiffString(ContextDiff(diff))
 	assertEqual(t, err, nil)
