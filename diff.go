@@ -22,11 +22,8 @@ import (
 	"io"
 	"runtime"
 	"strings"
-)
 
-const (
-	red   = "\033[31m"
-	green = "\033[32m"
+	"github.com/fatih/color"
 )
 
 // min return the smaller of two integers.
@@ -587,6 +584,8 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 	}
 
 	started := false
+	red := color.New(color.FgRed).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
 	m := NewMatcher(diff.A, diff.B)
 	for _, g := range m.GetGroupedOpCodes(diff.Context) {
 		if !started {
@@ -600,11 +599,11 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 				toDate = "\t" + diff.ToDate
 			}
 			if diff.FromFile != "" || diff.ToFile != "" {
-				err := wf("%s %s%s%s", colorize(red, "---"), diff.FromFile, fromDate, diff.Eol)
+				err := wf("%s %s%s%s", red("---"), diff.FromFile, fromDate, diff.Eol)
 				if err != nil {
 					return err
 				}
-				err = wf("%s %s%s%s", colorize(green, "+++"), diff.ToFile, toDate, diff.Eol)
+				err = wf("%s %s%s%s", green("+++"), diff.ToFile, toDate, diff.Eol)
 				if err != nil {
 					return err
 				}
@@ -628,14 +627,14 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 			}
 			if c.Tag == 'r' || c.Tag == 'd' {
 				for _, line := range diff.A[i1:i2] {
-					if err := ws(colorize(red, "-"+line)); err != nil {
+					if err := ws(red("-" + line)); err != nil {
 						return err
 					}
 				}
 			}
 			if c.Tag == 'r' || c.Tag == 'i' {
 				for _, line := range diff.B[j1:j2] {
-					if err := ws(colorize(green, "+"+line)); err != nil {
+					if err := ws(green("+" + line)); err != nil {
 						return err
 					}
 				}
@@ -643,13 +642,6 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 		}
 	}
 	return nil
-}
-
-func colorize(color, message string) string {
-	if runtime.GOOS == "windows" {
-		return message
-	}
-	return color + message + "\033[0m"
 }
 
 // GetUnifiedDiffString like WriteUnifiedDiff but returns the diff a string.
