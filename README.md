@@ -11,6 +11,7 @@ This repository is forked from [pmezard/go-difflib](https://github.com/pmezard/g
   
 When I forked the apitest package as the spectest package, I moved the go-spectest/diff package to a separate repository. I do not have the intention to extend the functionality of go-spectest/diff, but I will maintain it while maintaining the spectest package.
 
+The difference from the original version is that the standard output ("+++", "---" output) is colored even in the Windows environment. In other words, there is no longer any functional difference from Linux or Mac even on Windows.
 
 ## What is go-spectest/diff package ?
 The go-spectest/diff is a partial port of python 3 difflib package. Its main goal was to make unified and context diff available in pure Go, mostly for testing purposes.
