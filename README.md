@@ -4,7 +4,7 @@
 [![Vuluncheck](https://github.com/nao1215/diff/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/nao1215/diff/actions/workflows/govulncheck.yml)
 [![reviewdog](https://github.com/nao1215/diff/actions/workflows/reviewdog.yml/badge.svg)](https://github.com/nao1215/diff/actions/workflows/reviewdog.yml)
 [![Gosec](https://github.com/nao1215/diff/actions/workflows/security.yml/badge.svg)](https://github.com/nao1215/diff/actions/workflows/security.yml)
-![Coverage](https://github.com/go-spectest/octocovs-central-repo/blob/main//badges/nao1215/diff/coverage.svg?raw=true)
+![Coverage](https://github.com/nao1215/octocovs-central-repo/blob/main//badges/nao1215/diff/coverage.svg?raw=true)
 ## nao1215/diff package
 
 This repository is forked from [pmezard/go-difflib](https://github.com/pmezard/go-difflib) by [Stein Fletcher](https://github.com/steinfletcher). He was maintaining difflib within the apitest package.
